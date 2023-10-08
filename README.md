@@ -2,7 +2,7 @@
 A simple to use API for running queries on the EPA eGRID datasets. Using the datasets found at: https://www.epa.gov/egrid/download-data
 
 ## Simple SQL Queries
-Making a query to the API is as simple as making a SQL query. In the GET URL white your SQL statement with underscores in the place of spaces. Use the datasets as an example of what the SQL table looks like.
+Making a query to the API is as simple as making a SQL query. In the GET URL write your SQL statement with underscores in the place of spaces. Use the datasets as an example of what the SQL table looks like.
 
 ### Example:
 If I wanted to get all the CO2 emissions from the state of Texas in the year 2020, I would GET this:
