@@ -11,7 +11,7 @@ http://localhost:4000/query/select_stco2an_from_st20_where_pstatabb_=_'TX'
 
 - ST20 is the table in which all the 2020 state data is stored.
 - STCO2AN is the column  where all the annual CO2 output is stored.
-- PSTATABB is the column wher all the state abbreviations are stored.
+- PSTATABB is the column where all the state abbreviations are stored.
 
 Use the eGRID datasets as a reference of what the SQL tables look like :^)
 
