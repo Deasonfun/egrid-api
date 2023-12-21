@@ -11,6 +11,42 @@ import (
 	_ "github.com/lib/pq"
 )
 
+func CreateTable(tableName string, db *sql.DB, headers []string) {
+	_, err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", tableName))
+	CheckError(err)
+
+	createTable := fmt.Sprintf(
+		"CREATE TABLE IF NOT EXISTS %s(id SERIAL PRIMARY KEY, ", tableName,
+	)
+	for _, header := range headers {
+		headerInsertPart := fmt.Sprintf("%s VARCHAR(255), ", header)
+		createTable = createTable + headerInsertPart
+	}
+	createTable = strings.TrimSuffix(createTable, ", ")
+	createTable = createTable + ")"
+	_, err = db.Exec(createTable)
+	CheckError(err)
+}
+
+func InsertData(db *sql.DB, data []string, tableName string, err error) {
+	//println("%s", data)
+	var rowValues []string
+	for _, row := range data {
+		rowValues = nil
+		row := strings.Split(row, ",")
+		for _, cell := range row {
+			cell := fmt.Sprintf("'%s'", cell)
+			rowValues = append(rowValues, cell)
+		}
+		values := strings.Join(rowValues, ",")
+		populateCell := fmt.Sprintf("INSERT INTO %s VALUES(DEFAULT, %s) RETURNING *",
+			tableName, values)
+
+		_, err = db.Exec(populateCell)
+		CheckError(err)
+	}
+}
+
 func main() {
 
 	err := godotenv.Load("../.env")
@@ -61,39 +97,12 @@ func main() {
 			fileName := strings.Split(files.Name(), ".")
 			fmt.Println(fileName[0])
 
-			_, err = db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", fileName[0]))
-			CheckError(err)
-
-			createTable := fmt.Sprintf(
-				"CREATE TABLE IF NOT EXISTS %s(id SERIAL PRIMARY KEY)", fileName[0],
-			)
-			_, err = db.Exec(createTable)
-			CheckError(err)
-
 			data := strings.Split(splitFile[1], "\n")
 
-			for _, header := range headers {
-				addColumn := fmt.Sprintf("ALTER TABLE %s ADD %s VARCHAR(250)",
-					fileName[0], strings.TrimSpace(header))
-				_, err = db.Exec(addColumn)
-				CheckError(err)
-			}
-			headerValues := strings.Join(headers, ",")
-			var rowValues []string
-			for _, row := range data {
-				rowValues = nil
-				row := strings.Split(row, ",")
-				for _, cell := range row {
-					cell := fmt.Sprintf("'%s'", cell)
-					rowValues = append(rowValues, cell)
-				}
-				values := strings.Join(rowValues, ",")
-				populateCell := fmt.Sprintf("INSERT INTO %s(%s) VALUES(%s) RETURNING *",
-					fileName[0], headerValues, values)
+			CreateTable(fileName[0], db, headers)
 
-				_, err = db.Exec(populateCell)
-				CheckError(err)
-			}
+			InsertData(db, data, fileName[0], err)
+
 		}
 	}
 }
